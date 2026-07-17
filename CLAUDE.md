@@ -102,14 +102,6 @@ Download tokens must be unguessable (UUIDv4 or equivalent), never sequential IDs
 - `npm run lint` — ESLint (flat config in `eslint.config.js`)
 - `npm test` is a stub (`exit 1`) — no test suite exists yet.
 
-## Known issues in current code
-
-- `src/lib/db.js` and `src/lib/constants.js` use CommonJS `module.exports`, but `src/index.js` uses ESM `import`
-  and the package is `"type": "module"` — this mismatch will break at runtime. When touching these files, convert
-  them to `export`/`export default` rather than adding interop shims.
-- `src/index.js` references `__dirname`, which does not exist in native ESM — replace with
-  `import.meta.url` / `fileURLToPath` instead of polyfilling `__dirname`.
-
 ## Implementation Checklist
 
 **Foundation**

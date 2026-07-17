@@ -11,5 +11,8 @@ export default [
         process: "readonly",
       },
     },
+    rules: {
+      semi: ["warn", "always"],
+    },
   },
 ];

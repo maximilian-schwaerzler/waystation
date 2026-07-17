@@ -1,5 +1,4 @@
-module.exports = {
-    "DB_TABLE_SETUP_SQL": `
+export const DB_TABLE_SETUP_SQL = `
     CREATE TABLE IF NOT EXISTS files (
         id              INTEGER PRIMARY KEY AUTOINCREMENT,
         token           TEXT NOT NULL UNIQUE,
@@ -16,5 +15,4 @@ module.exports = {
 
     CREATE UNIQUE INDEX IF NOT EXISTS idx_files_token ON files(token);
     CREATE INDEX IF NOT EXISTS idx_files_expires_at ON files(expires_at);
-    `
-}
+    `;
