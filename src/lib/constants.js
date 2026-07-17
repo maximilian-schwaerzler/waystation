@@ -16,3 +16,5 @@ export const DB_TABLE_SETUP_SQL = `
     CREATE UNIQUE INDEX IF NOT EXISTS idx_files_token ON files(token);
     CREATE INDEX IF NOT EXISTS idx_files_expires_at ON files(expires_at);
     `;
+
+export const INSTANCE_ID_FILENAME = ".waystation_instance_id";

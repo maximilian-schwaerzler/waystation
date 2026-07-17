@@ -1,14 +1,23 @@
 import http from "http";
-import {initDb} from "./lib/db.js";
 import {handleFileUpload} from "./lib/fileUpload.js";
+import {waitForDataDir} from "./lib/dataStorage.js";
 
 const PORT = process.env.PORT || 3000;
 
 // eslint-disable-next-line no-unused-vars -- not wired into routes yet
-const db = initDb(process.env.DATA_DIR || "/data");
+//const db = initDb(dataDir);
+
+console.log(await waitForDataDir());
 
 const server = http.createServer((req, res) => {
   const {pathname} = new URL(req.url, `http://localhost:${PORT}`);
+
+  console.log(`${req.method} request on path '${pathname}'`);
+
+  if (pathname === '/') {
+    res.writeHead(200);
+    return res.end('healthy');
+  }
 
   if (req.method === 'POST' && pathname === '/upload') {
     return handleFileUpload(req, res);

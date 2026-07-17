@@ -1,0 +1,1 @@
+export const dataDir = process.env.DATA_DIR || "/data";
