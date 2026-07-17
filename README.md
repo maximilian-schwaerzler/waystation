@@ -44,13 +44,48 @@ npm start      # run once with plain `node .` (uses /data, not ./data)
 
 ## Running with Docker
 
+### First-time setup (one-time, per storage volume)
+
+Waystation ties its database and files to a unique instance ID stored alongside them.
+This lets it detect a wrong or swapped storage volume before touching it — but it means
+the **very first time you start it against a new volume, it won't come up straight
+away.** This is expected, not a bug — here's exactly what happens:
+
+**1. Copy the example env file.**
+
 ```
-docker compose up -d --build
+cp .env.example .env
 ```
 
-Copy `.env.example` to `.env` and fill it in — it documents all supported environment
-variables (`WAYSTATION_INSTANCE_ID`, `WAYSTATION_DATA_DIR`, `WAYSTATION_PUBLIC_URL`,
-`WAYSTATION_LOG_LEVEL`, etc.).
+**2. Start it.** Storage is empty, so instead of serving requests, it generates an
+instance ID, prints it, and exits:
 
-On first run, the container prints a generated `WAYSTATION_INSTANCE_ID` and exits —
-paste it into `.env` and restart. See `CLAUDE.md` for the full storage-readiness flow.
+```
+$ docker compose up
+waystation-1  | [2026-01-01T12:00:00.000Z][INFO] First run detected. Generated instance ID: 3f9a2e11-4b7a-4c9d-9e2a-1a2b3c4d5e6f
+waystation-1  | [2026-01-01T12:00:00.000Z][INFO] Set WAYSTATION_INSTANCE_ID=3f9a2e11-4b7a-4c9d-9e2a-1a2b3c4d5e6f in your .env file, then restart.
+waystation-1 exited with code 0
+```
+
+**3. Copy that ID into `.env`:**
+
+```
+WAYSTATION_INSTANCE_ID=3f9a2e11-4b7a-4c9d-9e2a-1a2b3c4d5e6f
+```
+
+**4. Start it again.** This time it verifies the ID against storage and stays running:
+
+```
+$ docker compose up -d --build
+$ docker compose logs -f
+waystation-1  | [2026-01-01T12:01:00.000Z][INFO] Storage verified.
+waystation-1  | [2026-01-01T12:01:00.000Z][INFO] Server running on http://localhost:3000
+```
+
+That's it — every run after this is just `docker compose up -d`. You'll only see this
+flow again if you point `WAYSTATION_DATA_DIR` at a fresh, empty volume.
+
+### Configuration
+
+`.env.example` documents all supported environment variables (`WAYSTATION_DATA_DIR`,
+`WAYSTATION_PUBLIC_URL`, `WAYSTATION_LOG_LEVEL`, etc.) beyond the instance ID above.
