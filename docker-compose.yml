@@ -1,0 +1,11 @@
+services:
+  waystation:
+    build: .
+    image: waystation
+    restart: "no"
+    ports:
+      - "3000:3000"
+    environment:
+      WAYSTATION_INSTANCE_ID: ${WAYSTATION_INSTANCE_ID:-}
+    volumes:
+      - ${WAYSTATION_DATA_DIR:-./data}:/app/data
