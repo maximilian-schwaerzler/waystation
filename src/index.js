@@ -1,14 +1,18 @@
 import http from "http";
 import {initDb} from "./lib/db.js";
+import {handleFileUpload} from "./lib/fileUpload.js";
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // eslint-disable-next-line no-unused-vars -- not wired into routes yet
 const db = initDb(process.env.DATA_DIR || "/data");
 
 const server = http.createServer((req, res) => {
-  res.writeHead(200, { "Content-Type": "text/plain" });
-  res.end("Hello, World!");
+  const {pathname} = new URL(req.url, `http://localhost:${PORT}`);
+
+  if (req.method === 'POST' && pathname === '/upload') {
+    return handleFileUpload(req, res);
+  }
 });
 
 server.listen(PORT, () => {
