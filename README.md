@@ -89,3 +89,14 @@ flow again if you point `WAYSTATION_DATA_DIR` at a fresh, empty volume.
 
 `.env.example` documents all supported environment variables (`WAYSTATION_DATA_DIR`,
 `WAYSTATION_PUBLIC_URL`, `WAYSTATION_LOG_LEVEL`, etc.) beyond the instance ID above.
+
+### Logs
+
+```
+docker compose logs -f
+```
+
+Logs are also written to `waystation.log` inside the storage volume (`WAYSTATION_DATA_DIR`
+on the host), rotated at 10MB via `pino-roll`. Useful if the container isn't running (crash
+loop, already exited) or you need history beyond what `docker compose logs` retains — just
+read the file directly from the host path you configured for `WAYSTATION_DATA_DIR`.

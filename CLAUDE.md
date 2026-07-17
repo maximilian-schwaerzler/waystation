@@ -105,25 +105,25 @@ Download tokens must be unguessable (UUIDv4 or equivalent), never sequential IDs
 ## Implementation Checklist
 
 **Foundation**
-- [ ] Node.js project scaffolding (package.json, entrypoint, Dockerfile)
-- [ ] Docker Compose with configurable WAYSTATION_DATA_DIR bind mount
-- [ ] restart: "no" (or omitted) in compose
-- [ ] Implement the 4-state instance-ID / storage-readiness flow
-- [ ] SQLite schema (file ID/token, filename, path/hash, upload timestamp, expiry)
-- [ ] pino logging setup (stdout + /data/waystation.log post-readiness, rotation, levels)
+- [x] Node.js project scaffolding (package.json, entrypoint, Dockerfile)
+- [x] Docker Compose with configurable WAYSTATION_DATA_DIR bind mount
+- [x] restart: "no" (or omitted) in compose
+- [x] Implement the 4-state instance-ID / storage-readiness flow
+- [x] SQLite schema (file ID/token, filename, path/hash, upload timestamp, expiry)
+- [x] pino logging setup (stdout + /data/waystation.log post-readiness, rotation, levels)
 
 **Upload path**
-- [ ] Streaming upload endpoint to /data
-- [ ] Hashed/random storage filename; original filename preserved in DB
-- [ ] Unguessable download token (UUIDv4) per file
-- [ ] Return download URL to client
+- [x] Streaming upload endpoint to /data
+- [x] Hashed/random storage filename; original filename preserved in DB
+- [x] Unguessable download token (UUIDv4) per file
+- [x] Return download URL to client
 - [ ] Upload endpoint authentication (TBD scheme)
 
 **Download path**
-- [ ] Streaming download endpoint from /data
-- [ ] Content-Disposition header with original filename
-- [ ] Content-Length header
-- [ ] HTTP Range request support
+- [x] Streaming download endpoint from /data
+- [x] Content-Disposition header with original filename
+- [x] Content-Length header
+- [x] HTTP Range request support
 
 **Thunderbird FileLink protocol**
 - [ ] Decide provider type (WebDAV-style vs. custom REST)
@@ -131,15 +131,15 @@ Download tokens must be unguessable (UUIDv4 or equivalent), never sequential IDs
 - [ ] End-to-end test with real Thunderbird client
 
 **Garbage collection**
-- [ ] node-cron scheduled job (hourly) in main process
-- [ ] Query + delete expired files/rows, async/non-blocking
-- [ ] Retry-safe: leave DB row on failed file deletion
-- [ ] Guard: don't run until storage-readiness check passed
+- [x] node-cron scheduled job (hourly) in main process
+- [x] Query + delete expired files/rows, async/non-blocking
+- [x] Retry-safe: leave DB row on failed file deletion
+- [x] Guard: don't run until storage-readiness check passed
 
 **Documentation**
-- [ ] README: first-time setup flow
-- [ ] README: how to read logs (docker compose logs + /data/waystation.log fallback)
-- [ ] .env.example documenting WAYSTATION_INSTANCE_ID and WAYSTATION_DATA_DIR
+- [x] README: first-time setup flow
+- [x] README: how to read logs (docker compose logs + /data/waystation.log fallback)
+- [x] .env.example documenting WAYSTATION_INSTANCE_ID and WAYSTATION_DATA_DIR
 
 **Optional / stretch**
 - [ ] Manual web upload UI
