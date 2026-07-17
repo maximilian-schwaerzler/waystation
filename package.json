@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node .",
-    "dev": "nodemon .",
+    "start": "node --env-file-if-exists=.env .",
+    "dev": "nodemon --exec \"node --env-file-if-exists=.env\" .",
     "lint": "eslint .",
     "prepare": "husky"
   },
