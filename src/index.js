@@ -1,13 +1,12 @@
 import http from "http";
 import {handleFileUpload} from "./lib/fileUpload.js";
-import {waitForDataDir} from "./lib/dataStorage.js";
+import {ensureDataDirReady} from "./lib/dataStorage.js";
 
 const PORT = process.env.PORT || 3000;
 
-// eslint-disable-next-line no-unused-vars -- not wired into routes yet
 //const db = initDb(dataDir);
 
-console.log(await waitForDataDir());
+await ensureDataDirReady();
 
 const server = http.createServer((req, res) => {
   const {pathname} = new URL(req.url, `http://localhost:${PORT}`);

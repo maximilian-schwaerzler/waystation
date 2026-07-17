@@ -40,7 +40,15 @@ export async function waitForDataDir() {
         if (result.status === 'not_found') {
             // State 1: true first run — generate and persist a new instance ID
             const id = uuidv4();
-            await writeFile(path.resolve(dataDir, INSTANCE_ID_FILENAME), id);
+            try {
+                await writeFile(path.resolve(dataDir, INSTANCE_ID_FILENAME), id);
+            } catch (err) {
+                throw new Error(
+                    `Cannot write sentinel file to ${dataDir}: ${err.message}. Check that ` +
+                    `WAYSTATION_DATA_DIR is mounted and writable.`,
+                    {cause: err}
+                );
+            }
             return {status: 'first_run', id};
         }
 
@@ -90,6 +98,38 @@ export async function waitForDataDir() {
         `WAYSTATION_INSTANCE_ID was set before the first run ever completed. Check that WAYSTATION_DATA_DIR ` +
         `is mounted correctly.`
     );
+}
+
+/**
+ * Runs the instance-ID / storage-readiness flow and acts on the result:
+ * prints operator instructions and exit(0)s for the "not configured yet"
+ * cases, logs and exit(-1)s on an unrecoverable failure, or resolves
+ * normally once storage is verified ready.
+ */
+export async function ensureDataDirReady() {
+    try {
+        const dataDirStatus = await waitForDataDir();
+
+        if (dataDirStatus.status === "first_run") {
+            console.log(`First run detected. Generated instance ID: ${dataDirStatus.id}`);
+            console.log(`Set WAYSTATION_INSTANCE_ID=${dataDirStatus.id} in your .env file, then restart.`);
+            process.exit(0);
+        }
+
+        if (dataDirStatus.status === "awaiting_env") {
+            console.log(`Storage already initialized with instance ID: ${dataDirStatus.id}`);
+            console.log(`Set WAYSTATION_INSTANCE_ID=${dataDirStatus.id} in your .env file, then restart.`);
+            process.exit(0);
+        }
+
+        if (dataDirStatus.status === "ready") {
+            console.log("Storage verified.");
+            // continue normal execution
+        }
+    } catch (err) {
+        console.error(`Storage readiness check failed: ${err.message}`);
+        process.exit(-1);
+    }
 }
 
 /**
