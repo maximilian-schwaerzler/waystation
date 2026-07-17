@@ -3,11 +3,13 @@ import {handleFileUpload} from "./lib/fileUpload.js";
 import {handleFileDownload} from "./lib/fileDownload.js";
 import {ensureDataDirReady} from "./lib/dataStorage.js";
 import {getDb} from "./lib/db.js";
+import {startGc} from "./lib/gc.js";
 import {getLogger} from "./lib/logger.js";
 import {port} from "./lib/config.js";
 
 await ensureDataDirReady();
 getDb();
+startGc();
 
 const server = http.createServer((req, res) => {
   const {pathname} = new URL(req.url, `http://localhost:${port}`);
