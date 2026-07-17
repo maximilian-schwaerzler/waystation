@@ -2,6 +2,22 @@
 
 A self-hostable Thunderbird FileLink service.
 
+## Getting the code
+
+```
+git clone git@github.com:maximilian-schwaerzler/waystation.git
+cd waystation
+```
+
+To push changes:
+
+```
+git push origin main
+```
+
+The repo is private — push access requires being added as a collaborator on
+[maximilian-schwaerzler/waystation](https://github.com/maximilian-schwaerzler/waystation).
+
 ## Local development
 
 Requires Node.js 24+.
@@ -32,5 +48,9 @@ npm start      # run once with plain `node .` (uses /data, not ./data)
 docker compose up -d --build
 ```
 
-See `.env.example` for the environment variables (`WAYSTATION_INSTANCE_ID`,
-`WAYSTATION_DATA_DIR`) to configure in a `.env` file.
+Copy `.env.example` to `.env` and fill it in — it documents all supported environment
+variables (`WAYSTATION_INSTANCE_ID`, `WAYSTATION_DATA_DIR`, `WAYSTATION_PUBLIC_URL`,
+`WAYSTATION_LOG_LEVEL`, etc.).
+
+On first run, the container prints a generated `WAYSTATION_INSTANCE_ID` and exits —
+paste it into `.env` and restart. See `CLAUDE.md` for the full storage-readiness flow.
