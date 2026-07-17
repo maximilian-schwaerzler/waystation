@@ -8,7 +8,7 @@
     "start": "node --env-file-if-exists=.env .",
     "dev": "nodemon --exec \"node --env-file-if-exists=.env\" .",
     "lint": "eslint .",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "keywords": [],
   "author": "",
