@@ -1,7 +1,6 @@
-import {dataDir} from "./config.js";
+import {dataDir, INSTANCE_ID_FILENAME} from "./config.js";
 import {readFile, writeFile} from "fs/promises";
 import path from "path";
-import {INSTANCE_ID_FILENAME} from "./constants.js";
 import {v4 as uuidv4, validate as uuidValidate} from "uuid";
 
 const POLL_INTERVAL_MS = 2000;

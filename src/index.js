@@ -1,12 +1,14 @@
 import http from "http";
 import {handleFileUpload} from "./lib/fileUpload.js";
 import {ensureDataDirReady} from "./lib/dataStorage.js";
+import {initDb} from "./lib/db.js";
 
 const PORT = process.env.PORT || 3000;
 
 //const db = initDb(dataDir);
 
 await ensureDataDirReady();
+await initDb();
 
 const server = http.createServer((req, res) => {
   const {pathname} = new URL(req.url, `http://localhost:${PORT}`);
