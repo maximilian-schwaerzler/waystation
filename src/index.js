@@ -3,6 +3,7 @@ import {initDb} from "./lib/db.js";
 
 const PORT = 3000;
 
+// eslint-disable-next-line no-unused-vars -- not wired into routes yet
 const db = initDb(process.env.DATA_DIR || "/data");
 
 const server = http.createServer((req, res) => {
