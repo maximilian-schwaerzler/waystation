@@ -8,12 +8,12 @@ RUN npm ci --omit=dev
 COPY src ./src
 
 RUN useradd --system --create-home --uid 1001 waystation \
-    && mkdir -p /app/data \
-    && chown -R waystation:waystation /app
+    && mkdir -p /data \
+    && chown -R waystation:waystation /app /data
 
 USER waystation
 
-VOLUME /app/data
+VOLUME /data
 
 EXPOSE 3000
 

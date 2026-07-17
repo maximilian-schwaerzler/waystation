@@ -8,4 +8,4 @@ services:
     environment:
       WAYSTATION_INSTANCE_ID: ${WAYSTATION_INSTANCE_ID:-}
     volumes:
-      - ${WAYSTATION_DATA_DIR:-./data}:/app/data
+      - ${WAYSTATION_DATA_DIR:-./data}:/data

@@ -1,11 +1,9 @@
 import http from "http";
 import {initDb} from "./lib/db.js";
-import path from "path";
-import {fileURLToPath} from "url";
 
 const PORT = 3000;
 
-const db = initDb(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../data"));
+const db = initDb(process.env.DATA_DIR || "/data");
 
 const server = http.createServer((req, res) => {
   res.writeHead(200, { "Content-Type": "text/plain" });
