@@ -30,7 +30,7 @@ function sleep(ms) {
  *   or the readiness poll timed out. Callers must catch this, log it, and
  *   exit(1) — none of these are retryable by calling waitForDataDir again.
  */
-export async function waitForDataDir() {
+async function waitForDataDir() {
     const envId = process.env.WAYSTATION_INSTANCE_ID;
     const envSet = envId !== undefined && envId !== "";
 
