@@ -12,7 +12,7 @@ const LOG_LEVEL = process.env.WAYSTATION_LOG_LEVEL || 'info';
  * Wraps one or more destination streams in a single Writable that pino can
  * log NDJSON into, reformatting each line as `[TIMESTAMP][LEVEL] MESSAGE`
  * before forwarding it on.
- * @param {NodeJS.WritableStream[]} destinations
+ * @param {*[]} destinations - streams (or stream-likes) with a .write(string) method
  */
 function createHumanReadableStream(destinations) {
     let buffer = '';
