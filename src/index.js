@@ -2,16 +2,16 @@ import http from "http";
 import {handleFileUpload} from "./lib/fileUpload.js";
 import {ensureDataDirReady} from "./lib/dataStorage.js";
 import {getDb} from "./lib/db.js";
-
-const PORT = process.env.PORT || 3000;
+import {getLogger} from "./lib/logger.js";
+import {port} from "./lib/config.js";
 
 await ensureDataDirReady();
 getDb();
 
 const server = http.createServer((req, res) => {
-  const {pathname} = new URL(req.url, `http://localhost:${PORT}`);
+  const {pathname} = new URL(req.url, `http://localhost:${port}`);
 
-  console.log(`${req.method} request on path '${pathname}'`);
+  getLogger().debug(`${req.method} request on path '${pathname}'`);
 
   if (pathname === '/') {
     res.writeHead(200);
@@ -23,6 +23,6 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+server.listen(port, () => {
+  getLogger().info(`Server running on http://localhost:${port}`);
 });

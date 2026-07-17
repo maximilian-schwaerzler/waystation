@@ -3,8 +3,9 @@ import {unlink} from "fs/promises";
 import {createHash} from "crypto";
 import path from "path";
 import {v4 as uuidv4} from "uuid";
-import {dataDir, uploadExpiryDays} from "./config.js";
+import {dataDir, uploadExpiryDays, resolvePublicOrigin} from "./config.js";
 import {getDb} from "./db.js";
+import {getLogger} from "./logger.js";
 
 const UPLOADS_DIRNAME = "files";
 
@@ -43,12 +44,12 @@ export function handleFileUpload(req, res) {
     req.on('data', (chunk) => hash.update(chunk));
 
     req.on('error', (err) => {
-        console.error(`Upload request error: ${err.message}`);
+        getLogger().error(`Upload request error: ${err.message}`);
         writeStream.destroy();
     });
 
     writeStream.on('error', (err) => {
-        console.error(`Upload write failed: ${err.message}`);
+        getLogger().error(`Upload write failed: ${err.message}`);
         if (!res.headersSent) {
             res.writeHead(500, {'Content-Type': 'text/plain'});
             res.end('Upload failed');
@@ -72,7 +73,7 @@ export function handleFileUpload(req, res) {
                 expiresAt,
             });
         } catch (err) {
-            console.error(`Failed to persist upload record: ${err.message}`);
+            getLogger().error(`Failed to persist upload record: ${err.message}`);
             await unlink(path.join(dataDir, storagePath)).catch(() => {});
             if (!res.headersSent) {
                 res.writeHead(500, {'Content-Type': 'text/plain'});
@@ -81,7 +82,7 @@ export function handleFileUpload(req, res) {
             return;
         }
 
-        const downloadUrl = `http://${req.headers.host}/download/${token}`;
+        const downloadUrl = `${resolvePublicOrigin(req)}/download/${token}`;
 
         res.writeHead(201, {'Content-Type': 'application/json', 'Location': downloadUrl});
         res.end(JSON.stringify({

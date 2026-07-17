@@ -2,6 +2,7 @@ import {dataDir, INSTANCE_ID_FILENAME} from "./config.js";
 import {readFile, writeFile} from "fs/promises";
 import path from "path";
 import {v4 as uuidv4, validate as uuidValidate} from "uuid";
+import {getLogger, enableFileLogging} from "./logger.js";
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_MAX_ATTEMPTS = 30;
@@ -110,23 +111,24 @@ export async function ensureDataDirReady() {
         const dataDirStatus = await waitForDataDir();
 
         if (dataDirStatus.status === "first_run") {
-            console.log(`First run detected. Generated instance ID: ${dataDirStatus.id}`);
-            console.log(`Set WAYSTATION_INSTANCE_ID=${dataDirStatus.id} in your .env file, then restart.`);
+            getLogger().info(`First run detected. Generated instance ID: ${dataDirStatus.id}`);
+            getLogger().info(`Set WAYSTATION_INSTANCE_ID=${dataDirStatus.id} in your .env file, then restart.`);
             process.exit(0);
         }
 
         if (dataDirStatus.status === "awaiting_env") {
-            console.log(`Storage already initialized with instance ID: ${dataDirStatus.id}`);
-            console.log(`Set WAYSTATION_INSTANCE_ID=${dataDirStatus.id} in your .env file, then restart.`);
+            getLogger().info(`Storage already initialized with instance ID: ${dataDirStatus.id}`);
+            getLogger().info(`Set WAYSTATION_INSTANCE_ID=${dataDirStatus.id} in your .env file, then restart.`);
             process.exit(0);
         }
 
         if (dataDirStatus.status === "ready") {
-            console.log("Storage verified.");
+            await enableFileLogging();
+            getLogger().info("Storage verified.");
             // continue normal execution
         }
     } catch (err) {
-        console.error(`Storage readiness check failed: ${err.message}`);
+        getLogger().error(`Storage readiness check failed: ${err.message}`);
         process.exit(-1);
     }
 }
@@ -147,13 +149,13 @@ async function sentinelFileHealthcheck() {
         if (uuidValidate(id)) {
             return {status: 'ok', id};
         }
-        console.warn("Sentinel file not valid UUID");
+        getLogger().warn("Sentinel file not valid UUID");
         return {status: 'invalid'};
     } catch (err) {
         if (err.code === 'ENOENT') {
             return {status: 'not_found'};
         }
-        console.warn(`Sentinel file healthcheck failed: ${err.message}`);
+        getLogger().warn(`Sentinel file healthcheck failed: ${err.message}`);
         return {status: 'error', error: err};
     }
 }

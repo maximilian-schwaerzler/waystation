@@ -4,6 +4,23 @@ export const INSTANCE_ID_FILENAME = ".waystation_instance_id";
 
 export const uploadExpiryDays = Number(process.env.WAYSTATION_UPLOAD_EXPIRY_DAYS) || 7;
 
+export const port = process.env.WAYSTATION_PORT || 3000;
+
+// Full base URL (e.g. https://files.example.com) used to build links returned
+// to clients, for deployments behind a proxy where the outbound hostname
+// differs from what Node itself binds to. Falls back to the request's Host
+// header when unset, which is fine for local dev but not guaranteed correct
+// behind a proxy.
+export const publicUrl = process.env.WAYSTATION_PUBLIC_URL?.replace(/\/$/, '') || null;
+
+/**
+ * @param {import('http').IncomingMessage} req
+ * @returns {string} origin (protocol + host, no trailing slash) to build public-facing links from
+ */
+export function resolvePublicOrigin(req) {
+    return publicUrl || `http://${req.headers.host}`;
+}
+
 export const DB_TABLE_SETUP_SQL = `
     CREATE TABLE IF NOT EXISTS files (
         id              INTEGER PRIMARY KEY AUTOINCREMENT,
