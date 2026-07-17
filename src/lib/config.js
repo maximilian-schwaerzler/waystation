@@ -2,6 +2,8 @@ export const dataDir = process.env.DATA_DIR || "/data";
 
 export const INSTANCE_ID_FILENAME = ".waystation_instance_id";
 
+export const uploadExpiryDays = Number(process.env.WAYSTATION_UPLOAD_EXPIRY_DAYS) || 7;
+
 export const DB_TABLE_SETUP_SQL = `
     CREATE TABLE IF NOT EXISTS files (
         id              INTEGER PRIMARY KEY AUTOINCREMENT,
