@@ -27,6 +27,9 @@ const server = http.createServer((req, res) => {
     const token = pathname.slice('/download/'.length);
     return handleFileDownload(req, res, token);
   }
+
+  res.writeHead(404, {'Content-Type': 'text/plain'});
+  res.end('Not found');
 });
 
 server.listen(port, () => {

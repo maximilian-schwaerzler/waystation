@@ -21,6 +21,13 @@ function contentDispositionHeader(filename) {
  * @param {string} token
  */
 export function handleFileDownload(req, res, token) {
+    if (!token) {
+        // Schema enforces CHECK (length(token) > 0), so an empty token can
+        // never match a row — skip the DB round-trip entirely.
+        res.writeHead(404, {'Content-Type': 'text/plain'});
+        return res.end('Not found');
+    }
+
     const row = getDb().prepare(`
         SELECT original_name, storage_path, expires_at
         FROM files WHERE token = ?
