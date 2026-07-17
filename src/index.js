@@ -1,5 +1,6 @@
 import http from "http";
 import {handleFileUpload} from "./lib/fileUpload.js";
+import {handleFileDownload} from "./lib/fileDownload.js";
 import {ensureDataDirReady} from "./lib/dataStorage.js";
 import {getDb} from "./lib/db.js";
 import {getLogger} from "./lib/logger.js";
@@ -20,6 +21,11 @@ const server = http.createServer((req, res) => {
 
   if (req.method === 'POST' && pathname === '/upload') {
     return handleFileUpload(req, res);
+  }
+
+  if (req.method === 'GET' && pathname.startsWith('/download/')) {
+    const token = pathname.slice('/download/'.length);
+    return handleFileDownload(req, res, token);
   }
 });
 

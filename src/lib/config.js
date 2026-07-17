@@ -18,6 +18,7 @@ export const publicUrl = process.env.WAYSTATION_PUBLIC_URL?.replace(/\/$/, '') |
  * @returns {string} origin (protocol + host, no trailing slash) to build public-facing links from
  */
 export function resolvePublicOrigin(req) {
+    // noinspection HttpUrlsUsage
     return publicUrl || `http://${req.headers.host}`;
 }
 
