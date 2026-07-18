@@ -46,6 +46,11 @@ const server = http.createServer((req, res) => {
   res.end('Not found');
 });
 
+// Node's default (5 minutes) cuts off large uploads before the body finishes streaming in.
+// Kept non-zero (rather than disabled) per Node's own docs, to still guard against
+// slow-request DoS when this server is deployed without a reverse proxy in front.
+server.requestTimeout = 30 * 60 * 1000; // 30 minutes
+
 server.listen(port, () => {
   getLogger().info(`Server running on http://localhost:${port}`);
 });

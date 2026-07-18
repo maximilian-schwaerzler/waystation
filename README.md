@@ -104,6 +104,19 @@ ignored when using this override. If writes fail with permission errors, check t
 export's squash setting (`no_root_squash`, or map `anonuid`/`anongid` to the container's
 UID 1001).
 
+To avoid passing both `-f` flags on every invocation, set `COMPOSE_FILE=docker-compose.yml:docker-compose.nfs.yml`
+in `.env` (see `.env.example`) — Compose reads that automatically, so plain `docker compose
+up -d` picks up the override.
+
+Docker only applies a named volume's `driver_opts` (the NFS settings) when the volume is
+first created — if you already brought the stack up once with just the base
+`docker-compose.yml` (or before setting the NFS env vars), a plain local volume named
+`waystation_waystation-data` will already exist and silently shadow the NFS config. Check
+with `docker volume inspect waystation_waystation-data` (look for `"Driver": "local"` with
+NFS options under `"Options"`); if it's missing, `docker compose down`, `docker volume rm
+waystation_waystation-data` (this deletes whatever's currently in it), then bring the stack
+back up to recreate it against the NAS.
+
 ### Configuration
 
 `.env.example` documents all supported environment variables (`WAYSTATION_DATA_DIR`,
