@@ -1,15 +1,23 @@
 import http from "http";
 import {handleFileUpload} from "./lib/fileUpload.js";
 import {handleFileDownload} from "./lib/fileDownload.js";
+import {isAuthorizedUpload} from "./lib/auth.js";
 import {ensureDataDirReady} from "./lib/dataStorage.js";
 import {getDb} from "./lib/db.js";
 import {startGc} from "./lib/gc.js";
 import {getLogger} from "./lib/logger.js";
-import {port} from "./lib/config.js";
+import {port, uploadAuthToken} from "./lib/config.js";
 
 await ensureDataDirReady();
 getDb();
 startGc();
+
+if (!uploadAuthToken) {
+  getLogger().warn(
+    "WAYSTATION_UPLOAD_TOKEN is not set — /upload is unauthenticated. " +
+    "Anyone who can reach this server can upload files. Set WAYSTATION_UPLOAD_TOKEN to require a bearer token."
+  );
+}
 
 const server = http.createServer((req, res) => {
   const {pathname} = new URL(req.url, `http://localhost:${port}`);
@@ -22,6 +30,10 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.method === 'POST' && pathname === '/upload') {
+    if (!isAuthorizedUpload(req)) {
+      res.writeHead(401, {'Content-Type': 'text/plain', 'WWW-Authenticate': 'Bearer'});
+      return res.end('Unauthorized');
+    }
     return handleFileUpload(req, res);
   }
 

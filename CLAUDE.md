@@ -87,10 +87,16 @@ rotation (`pino-roll`). Log levels: lifecycle events (startup, GC runs, errors) 
 
 Download tokens must be unguessable (UUIDv4 or equivalent), never sequential IDs.
 
+`POST /upload` requires `Authorization: Bearer <WAYSTATION_UPLOAD_TOKEN>` when that env var is set
+(`src/lib/auth.js`, checked via `timingSafeEqual`). If unset, uploads are unauthenticated and the server logs a
+warning at startup — this is opt-in rather than enforced so local dev doesn't need a token, but production
+deployments should always set one. `GET /download/:token` is intentionally unauthenticated regardless — those
+links are meant to be shared by email; the unguessable token is the access control for that endpoint, not a
+bearer token.
+
 ## Open / undecided
 
 - Thunderbird FileLink provider type: generic WebDAV-style vs. custom REST provider — not yet decided.
-- Upload endpoint authentication scheme for Thunderbird — TBD, depends on above.
 - Optional manual web UI for general-purpose uploads — stretch goal, not started.
 - Resumable/chunked uploads for very large attachments — stretch goal.
 - Multi-instance scaling — explicitly out of scope for now (single instance assumed).
@@ -117,7 +123,7 @@ Download tokens must be unguessable (UUIDv4 or equivalent), never sequential IDs
 - [x] Hashed/random storage filename; original filename preserved in DB
 - [x] Unguessable download token (UUIDv4) per file
 - [x] Return download URL to client
-- [ ] Upload endpoint authentication (TBD scheme)
+- [x] Upload endpoint authentication (bearer token via WAYSTATION_UPLOAD_TOKEN, opt-in)
 
 **Download path**
 - [x] Streaming download endpoint from /data
@@ -127,7 +133,8 @@ Download tokens must be unguessable (UUIDv4 or equivalent), never sequential IDs
 
 **Thunderbird FileLink protocol**
 - [ ] Decide provider type (WebDAV-style vs. custom REST)
-- [ ] Implement upload/auth contract
+- [x] Implement upload/auth contract (custom REST: POST /upload?filename=, bearer token auth — see
+      tb-waystation-addon repo's add-on for the client side)
 - [ ] End-to-end test with real Thunderbird client
 
 **Garbage collection**

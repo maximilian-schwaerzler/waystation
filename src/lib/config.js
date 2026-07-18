@@ -6,6 +6,10 @@ export const uploadExpiryDays = Number(process.env.WAYSTATION_UPLOAD_EXPIRY_DAYS
 
 export const port = process.env.WAYSTATION_PORT || 3000;
 
+// Bearer token required on POST /upload requests. If unset, uploads are
+// unauthenticated — anyone who can reach the server can upload.
+export const uploadAuthToken = process.env.WAYSTATION_UPLOAD_TOKEN || null;
+
 // Full base URL (e.g. https://files.example.com) used to build links returned
 // to clients, for deployments behind a proxy where the outbound hostname
 // differs from what Node itself binds to. Falls back to the request's Host

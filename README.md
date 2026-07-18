@@ -90,6 +90,11 @@ flow again if you point `WAYSTATION_DATA_DIR` at a fresh, empty volume.
 `.env.example` documents all supported environment variables (`WAYSTATION_DATA_DIR`,
 `WAYSTATION_PUBLIC_URL`, `WAYSTATION_LOG_LEVEL`, etc.) beyond the instance ID above.
 
+Set `WAYSTATION_UPLOAD_TOKEN` to require an `Authorization: Bearer <token>` header on
+`POST /upload`. If unset, uploads are unauthenticated — the server logs a warning at
+startup as a reminder. `GET /download/:token` is unaffected either way; those links are
+meant to be shared and rely on the token being unguessable, not on this.
+
 ### Logs
 
 ```
