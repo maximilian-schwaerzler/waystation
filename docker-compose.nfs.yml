@@ -1,0 +1,12 @@
+services:
+  waystation:
+    volumes:
+      - waystation-data:/waystation-data
+
+volumes:
+  waystation-data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=${WAYSTATION_NFS_SERVER},rw,nfsvers=4,soft,timeo=30
+      device: ":${WAYSTATION_NFS_EXPORT}"

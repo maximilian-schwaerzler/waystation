@@ -29,17 +29,17 @@ npm run dev
 
 `npm run dev` runs the server with `nodemon`, which auto-restarts on file changes. Data
 (the SQLite DB and uploaded files) is written to `waystation-data` in the repo — this is handled
-by `nodemon.json`, which sets `DATA_DIR=./data` for dev runs only. No Docker container or
-manual setup of `/data` is needed for local development.
+by `nodemon.json`, which sets `DATA_DIR=./waystation-data` for dev runs only. No Docker
+container or manual setup of `/waystation-data` is needed for local development.
 
-In production (via Docker), the app always uses the fixed path `/data` instead — see
-`docker-compose.yml` and the `WAYSTATION_DATA_DIR` bind mount.
+In production (via Docker), the app always uses the fixed path `/waystation-data` instead —
+see `docker-compose.yml` and the `WAYSTATION_DATA_DIR` bind mount.
 
 Other commands:
 
 ```
 npm run lint   # ESLint
-npm start      # run once with plain `node .` (uses /data, not ./data)
+npm start      # run once with plain `node .` (uses /waystation-data, not ./waystation-data)
 ```
 
 ## Running with Docker
@@ -84,6 +84,25 @@ waystation-1  | [2026-01-01T12:01:00.000Z][INFO] Server running on http://localh
 
 That's it — every run after this is just `docker compose up -d`. You'll only see this
 flow again if you point `WAYSTATION_DATA_DIR` at a fresh, empty volume.
+
+### Deploying against an NFS-mounted NAS
+
+For off-VPS storage (e.g. a Synology NAS reachable over Tailscale), don't rely on a
+host-level `mount -t nfs` + bind mount — a bind mount to a path that isn't actually
+mounted yet silently creates an empty local directory instead of failing loudly, and
+host-level NFS mount timing can race the container start. Instead, use the
+`docker-compose.nfs.yml` override, which has Docker mount the export directly as a named
+volume:
+
+```
+docker compose -f docker-compose.yml -f docker-compose.nfs.yml up -d
+```
+
+Set `WAYSTATION_NFS_SERVER` (the NAS address) and `WAYSTATION_NFS_EXPORT` (the export
+path, e.g. `/volume1/waystation`) in `.env` — see `.env.example`. `WAYSTATION_DATA_DIR` is
+ignored when using this override. If writes fail with permission errors, check the NAS
+export's squash setting (`no_root_squash`, or map `anonuid`/`anongid` to the container's
+UID 1001).
 
 ### Configuration
 
