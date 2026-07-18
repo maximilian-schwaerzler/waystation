@@ -11,8 +11,8 @@ logs/
 *.log
 npm-debug.log*
 
-# Runtime data
-data/
+# Runtime waystation-data
+waystation-data/
 pids/
 *.pid
 *.seed

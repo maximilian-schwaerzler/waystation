@@ -1,4 +1,4 @@
-export const dataDir = process.env.DATA_DIR || "/data";
+export const dataDir = process.env.DATA_DIR || "/waystation-data";
 
 export const INSTANCE_ID_FILENAME = ".waystation_instance_id";
 

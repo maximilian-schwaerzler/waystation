@@ -50,7 +50,7 @@ let logger = pino({level: LOG_LEVEL}, createHumanReadableStream([process.stdout]
 
 /**
  * Returns the shared logger. Always logs to stdout; logs to
- * /data/waystation.log too once enableFileLogging() has been called.
+ * /waystation-data/waystation.log too once enableFileLogging() has been called.
  * @returns {import('pino').Logger}
  */
 export function getLogger() {
@@ -58,7 +58,7 @@ export function getLogger() {
 }
 
 /**
- * Adds /data/waystation.log (rotated via pino-roll) as a second destination
+ * Adds /waystation-data/waystation.log (rotated via pino-roll) as a second destination
  * alongside stdout. Must not be called until storage readiness is verified
  * (see ensureDataDirReady()), since it does filesystem I/O against dataDir.
  */

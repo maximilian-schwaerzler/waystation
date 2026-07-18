@@ -28,7 +28,7 @@ npm run dev
 ```
 
 `npm run dev` runs the server with `nodemon`, which auto-restarts on file changes. Data
-(the SQLite DB and uploaded files) is written to `./data` in the repo — this is handled
+(the SQLite DB and uploaded files) is written to `waystation-data` in the repo — this is handled
 by `nodemon.json`, which sets `DATA_DIR=./data` for dev runs only. No Docker container or
 manual setup of `/data` is needed for local development.
 
