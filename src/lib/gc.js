@@ -15,7 +15,7 @@ const GC_SCHEDULE = process.env.WAYSTATION_GC_SCHEDULE || '0 * * * *';
  */
 export async function runGc() {
     const expired = getDb()
-        .prepare(`SELECT id, token, storage_path FROM files WHERE expires_at <= ?`)
+        .prepare(`SELECT id, storage_path FROM files WHERE expires_at <= ?`)
         .all(new Date().toISOString());
 
     if (expired.length === 0) {
@@ -31,7 +31,7 @@ export async function runGc() {
             await unlink(path.join(dataDir, file.storage_path));
         } catch (err) {
             if (err.code !== 'ENOENT') {
-                getLogger().error(`GC: failed to delete file for token ${file.token}: ${err.message}`);
+                getLogger().error(`GC: failed to delete file for file id ${file.id}: ${err.message}`);
                 continue;
             }
             // ENOENT: file's already gone, fine to remove the row below

@@ -29,7 +29,7 @@ export function handleFileDownload(req, res, token) {
     }
 
     const row = getDb().prepare(`
-        SELECT original_name, storage_path, expires_at
+        SELECT id, original_name, storage_path, expires_at
         FROM files WHERE token = ?
     `).get(token);
 
@@ -49,7 +49,7 @@ export function handleFileDownload(req, res, token) {
     try {
         stat = statSync(filePath);
     } catch (err) {
-        getLogger().error(`Download failed, file missing on disk for token ${token}: ${err.message}`);
+        getLogger().error(`Download failed, file missing on disk for file id ${row.id}: ${err.message}`);
         res.writeHead(404, {'Content-Type': 'text/plain'});
         return res.end('Not found');
     }
