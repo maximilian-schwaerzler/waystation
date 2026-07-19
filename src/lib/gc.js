@@ -31,7 +31,7 @@ export async function runGc() {
             await unlink(path.join(dataDir, file.storage_path));
         } catch (err) {
             if (err.code !== 'ENOENT') {
-                getLogger().error(`GC: failed to delete file for file id ${file.id}: ${err.message}`);
+                getLogger().error(`GC: failed to delete file for file id ${file.id}: ${err.code}`);
                 continue;
             }
             // ENOENT: file's already gone, fine to remove the row below

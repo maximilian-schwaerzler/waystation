@@ -49,7 +49,7 @@ export function handleFileDownload(req, res, token) {
     try {
         stat = statSync(filePath);
     } catch (err) {
-        getLogger().error(`Download failed, file missing on disk for file id ${row.id}: ${err.message}`);
+        getLogger().error(`Download failed, file missing on disk for file id ${row.id}: ${err.code}`);
         res.writeHead(404, {'Content-Type': 'text/plain'});
         return res.end('Not found');
     }
