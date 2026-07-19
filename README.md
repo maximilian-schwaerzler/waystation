@@ -29,7 +29,7 @@ npm run dev
 
 `npm run dev` runs the server with `nodemon`, which auto-restarts on file changes. Data
 (the SQLite DB and uploaded files) is written to `waystation-data` in the repo — this is handled
-by `nodemon.json`, which sets `DATA_DIR=./waystation-data` for dev runs only. No Docker
+by `nodemon.json`, which sets `WAYSTATION_DATA_DIR=./waystation-data` for dev runs only. No Docker
 container or manual setup of `/waystation-data` is needed for local development.
 
 In production (via Docker), the app always uses the fixed path `/waystation-data` instead —
@@ -42,14 +42,46 @@ npm run lint   # ESLint
 npm start      # run once with plain `node .` (uses /waystation-data, not ./waystation-data)
 ```
 
+## Running without Docker
+
+Docker isn't required — the app is a plain Node.js process (raw `http` module,
+`better-sqlite3`, filesystem I/O) and runs the same way outside a container. This is a
+reasonable option if your host doesn't have Docker, or you just don't want it.
+
+```
+cp .env.example .env
+# fill in .env, set WAYSTATION_DATA_DIR to wherever you want the DB and files stored
+npm install
+npm start
+```
+
+`npm start` runs `node --env-file-if-exists=.env .`, so `.env` is loaded natively without
+needing `dotenv`. Everything else — the instance-ID/storage-readiness flow, GC, logging —
+behaves identically to the Docker setup below; you're just responsible for what Docker
+otherwise provided (reverse proxy/TLS, process supervision/restart-on-boot, the healthcheck
+endpoint at `/`).
+
+> [!WARNING]
+> Use an absolute path for `WAYSTATION_DATA_DIR` in any real deployment. A relative path
+> resolves against the process's working directory at startup, not against `.env` or the
+> repo — fine for local dev where you always run from the repo root, but easy to get wrong
+> under a process manager (e.g. a systemd unit with a different `WorkingDirectory`), which
+> would silently read/write data from the wrong place.
+
+This is also part of why no prebuilt Docker image is published: building one yourself with
+`docker compose build` (or running the app directly, as above) is easy enough that a
+published image isn't worth maintaining.
+
 ## Running with Docker
 
 ### First-time setup (one-time, per storage volume)
 
 Waystation ties its database and files to a unique instance ID stored alongside them.
-This lets it detect a wrong or swapped storage volume before touching it — but it means
-the **very first time you start it against a new volume, it won't come up straight
-away.** This is expected, not a bug — here's exactly what happens:
+This lets it detect a wrong or swapped storage volume before touching it.
+
+> [!NOTE]
+> The very first time you start it against a new volume, it won't come up straight away.
+> This is expected, not a bug — here's exactly what happens:
 
 **1. Copy the example env file.**
 
@@ -87,16 +119,18 @@ flow again if you point `WAYSTATION_DATA_DIR` at a fresh, empty volume.
 
 ### Deploying against an NFS-mounted NAS
 
-For off-VPS storage (e.g. a Synology NAS reachable over Tailscale), don't rely on a
-host-level `mount -t nfs` + bind mount — a bind mount to a path that isn't actually
-mounted yet silently creates an empty local directory instead of failing loudly, and
-host-level NFS mount timing can race the container start. Instead, use the
+For off-VPS storage (e.g. a Synology NAS reachable over Tailscale), use the
 `docker-compose.nfs.yml` override, which has Docker mount the export directly as a named
 volume:
 
 ```
 docker compose -f docker-compose.yml -f docker-compose.nfs.yml up -d
 ```
+
+> [!WARNING]
+> Don't rely on a host-level `mount -t nfs` + bind mount instead — a bind mount to a path
+> that isn't actually mounted yet silently creates an empty local directory instead of
+> failing loudly, and host-level NFS mount timing can race the container start.
 
 Set `WAYSTATION_NFS_SERVER` (the NAS address) and `WAYSTATION_NFS_EXPORT` (the export
 path, e.g. `/volume1/waystation`) in `.env` — see `.env.example`. `WAYSTATION_DATA_DIR` is
@@ -108,14 +142,15 @@ To avoid passing both `-f` flags on every invocation, set `COMPOSE_FILE=docker-c
 in `.env` (see `.env.example`) — Compose reads that automatically, so plain `docker compose
 up -d` picks up the override.
 
-Docker only applies a named volume's `driver_opts` (the NFS settings) when the volume is
-first created — if you already brought the stack up once with just the base
-`docker-compose.yml` (or before setting the NFS env vars), a plain local volume named
-`waystation_waystation-data` will already exist and silently shadow the NFS config. Check
-with `docker volume inspect waystation_waystation-data` (look for `"Driver": "local"` with
-NFS options under `"Options"`); if it's missing, `docker compose down`, `docker volume rm
-waystation_waystation-data` (this deletes whatever's currently in it), then bring the stack
-back up to recreate it against the NAS.
+> [!CAUTION]
+> Docker only applies a named volume's `driver_opts` (the NFS settings) when the volume is
+> first created — if you already brought the stack up once with just the base
+> `docker-compose.yml` (or before setting the NFS env vars), a plain local volume named
+> `waystation_waystation-data` will already exist and silently shadow the NFS config. Check
+> with `docker volume inspect waystation_waystation-data` (look for `"Driver": "local"` with
+> NFS options under `"Options"`); if it's missing, `docker compose down`, `docker volume rm
+> waystation_waystation-data` (**this deletes whatever's currently in it**), then bring the
+> stack back up to recreate it against the NAS.
 
 ### Configuration
 
@@ -123,9 +158,13 @@ back up to recreate it against the NAS.
 `WAYSTATION_PUBLIC_URL`, `WAYSTATION_LOG_LEVEL`, etc.) beyond the instance ID above.
 
 Set `WAYSTATION_UPLOAD_TOKEN` to require an `Authorization: Bearer <token>` header on
-`POST /upload`. If unset, uploads are unauthenticated — the server logs a warning at
-startup as a reminder. `GET /download/:token` is unaffected either way; those links are
-meant to be shared and rely on the token being unguessable, not on this.
+`POST /upload`. `GET /download/:token` is unaffected either way; those links are meant to
+be shared and rely on the token being unguessable, not on this.
+
+> [!IMPORTANT]
+> If `WAYSTATION_UPLOAD_TOKEN` is unset, uploads are unauthenticated — anyone who can reach
+> the server can upload files. The server logs a warning at startup as a reminder. Always
+> set this for anything but local dev.
 
 ### Logs
 
