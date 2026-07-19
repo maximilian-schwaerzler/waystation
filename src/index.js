@@ -8,6 +8,15 @@ import {startGc} from "./lib/gc.js";
 import {getLogger} from "./lib/logger.js";
 import {port, uploadAuthToken} from "./lib/config.js";
 
+const configuredWaystationVars = Object.keys(process.env).filter((key) => key.startsWith("WAYSTATION_"));
+if (configuredWaystationVars.length === 0) {
+  getLogger().warn(
+    "No WAYSTATION_* environment variables are set. If this is unexpected, check that .env exists " +
+    "(copy .env.example to .env) and that it's actually being loaded (e.g. run via `npm start`, which " +
+    "passes --env-file-if-exists=.env)."
+  );
+}
+
 await ensureDataDirReady();
 getDb();
 startGc();
