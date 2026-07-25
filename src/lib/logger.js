@@ -68,5 +68,16 @@ export async function enableFileLogging() {
         size: '10m',
         mkdir: true,
     });
+
+    // A write/open error on the file destination (e.g. a permissions problem on a
+    // network-mounted data dir) must not take the whole process down — fall back to
+    // stdout-only logging instead of crashing on this stream's unhandled 'error' event.
+    fileStream.on('error', (err) => {
+        process.stderr.write(
+            `[${new Date().toISOString()}][ERROR] File logging failed, falling back to stdout only: ${err.message}\n`
+        );
+        logger = pino({level: LOG_LEVEL}, createHumanReadableStream([process.stdout]));
+    });
+
     logger = pino({level: LOG_LEVEL}, createHumanReadableStream([process.stdout, fileStream]));
 }

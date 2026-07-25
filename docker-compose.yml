@@ -3,8 +3,8 @@ services:
     build: .
     image: waystation
     restart: "no"
-    ports:
-      - "3000:${WAYSTATION_PORT:-3000}"
+#    ports:
+#      - "3000:${WAYSTATION_PORT:-3000}"
     environment:
       WAYSTATION_INSTANCE_ID: ${WAYSTATION_INSTANCE_ID:-}
       WAYSTATION_PUBLIC_URL: ${WAYSTATION_PUBLIC_URL:-}
@@ -13,5 +13,18 @@ services:
       WAYSTATION_UPLOAD_EXPIRY_DAYS: ${WAYSTATION_UPLOAD_EXPIRY_DAYS:-}
       WAYSTATION_PORT: ${WAYSTATION_PORT:-}
       WAYSTATION_UPLOAD_TOKEN: ${WAYSTATION_UPLOAD_TOKEN:-}
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.waystation.rule=Host(`${WAYSTATION_HOST}`)"
+      - "traefik.http.routers.waystation.entrypoints=websecure"
+      - "traefik.http.routers.waystation.tls=true"
+      - "traefik.http.routers.waystation.tls.certresolver=le"
+      - "traefik.http.services.waystation.loadbalancer.server.port=3000"
     volumes:
       - ${WAYSTATION_DATA_DIR:-./waystation-data}:/waystation-data
+
+networks:
+  proxy:
+    external: true
