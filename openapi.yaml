@@ -11,10 +11,14 @@ info:
     identifier: MIT
 
 servers:
-  - url: /
+  - url: "{baseUrl}"
     description: >
       Base URL is whatever WAYSTATION_PUBLIC_URL is set to in production (or the request's
-      Host header if unset — see the security note on GET /).
+      Host header if unset — see the security note on GET /). Defaults to local dev; edit
+      the variable below to try requests against your own deployment.
+    variables:
+      baseUrl:
+        default: http://localhost:3000
 
 paths:
   /:
