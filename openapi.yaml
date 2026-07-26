@@ -7,7 +7,8 @@ info:
     later fetches the file over HTTP.
   version: "1.0.0"
   license:
-    name: ISC
+    name: MIT
+    identifier: MIT
 
 servers:
   - url: /
@@ -28,7 +29,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: healthy
+                examples: [healthy]
 
   /upload:
     post:
@@ -85,7 +86,7 @@ paths:
             WWW-Authenticate:
               schema:
                 type: string
-                example: Bearer
+                examples: [Bearer]
           content:
             text/plain:
               schema:
@@ -139,11 +140,11 @@ paths:
             Accept-Ranges:
               schema:
                 type: string
-                example: bytes
+                examples: [bytes]
             X-Content-Type-Options:
               schema:
                 type: string
-                example: nosniff
+                examples: [nosniff]
           content:
             application/octet-stream:
               schema:
@@ -155,7 +156,7 @@ paths:
             Content-Range:
               schema:
                 type: string
-                example: bytes 0-999/5000
+                examples: [bytes 0-999/5000]
             Content-Length:
               schema:
                 type: integer
@@ -165,7 +166,7 @@ paths:
             X-Content-Type-Options:
               schema:
                 type: string
-                example: nosniff
+                examples: [nosniff]
           content:
             application/octet-stream:
               schema:
@@ -189,7 +190,7 @@ paths:
             Content-Range:
               schema:
                 type: string
-                example: bytes */5000
+                examples: [bytes */5000]
 
   /upload/{token}:
     delete:
@@ -219,7 +220,7 @@ paths:
             WWW-Authenticate:
               schema:
                 type: string
-                example: Bearer
+                examples: [Bearer]
           content:
             text/plain:
               schema:
