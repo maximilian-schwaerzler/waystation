@@ -33,7 +33,9 @@ paths:
             text/plain:
               schema:
                 type: string
-                examples: [healthy]
+              examples:
+                healthy:
+                  value: healthy
 
   /upload:
     post:
@@ -90,7 +92,9 @@ paths:
             WWW-Authenticate:
               schema:
                 type: string
-                examples: [Bearer]
+              examples:
+                bearer:
+                  value: Bearer
           content:
             text/plain:
               schema:
@@ -144,11 +148,15 @@ paths:
             Accept-Ranges:
               schema:
                 type: string
-                examples: [bytes]
+              examples:
+                bytes:
+                  value: bytes
             X-Content-Type-Options:
               schema:
                 type: string
-                examples: [nosniff]
+              examples:
+                nosniff:
+                  value: nosniff
           content:
             application/octet-stream:
               schema:
@@ -160,7 +168,9 @@ paths:
             Content-Range:
               schema:
                 type: string
-                examples: [bytes 0-999/5000]
+              examples:
+                range:
+                  value: "bytes 0-999/5000"
             Content-Length:
               schema:
                 type: integer
@@ -170,7 +180,9 @@ paths:
             X-Content-Type-Options:
               schema:
                 type: string
-                examples: [nosniff]
+              examples:
+                nosniff:
+                  value: nosniff
           content:
             application/octet-stream:
               schema:
@@ -194,7 +206,9 @@ paths:
             Content-Range:
               schema:
                 type: string
-                examples: [bytes */5000]
+              examples:
+                unsatisfiable:
+                  value: "bytes */5000"
 
   /upload/{token}:
     delete:
@@ -224,7 +238,9 @@ paths:
             WWW-Authenticate:
               schema:
                 type: string
-                examples: [Bearer]
+              examples:
+                bearer:
+                  value: Bearer
           content:
             text/plain:
               schema:
