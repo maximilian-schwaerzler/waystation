@@ -135,6 +135,9 @@ paths:
           description: 'Byte range, e.g. `bytes=0-999` or `bytes=-500` for the last 500 bytes.'
           schema:
             type: string
+          examples:
+            firstThousandBytes:
+              value: bytes=0-999
       responses:
         "200":
           description: Full file content.
