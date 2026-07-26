@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
+    "test:watch": "node --test --watch",
     "start": "node --env-file-if-exists=.env .",
     "dev": "nodemon --exec \"node --env-file-if-exists=.env\" .",
     "lint": "eslint .",
