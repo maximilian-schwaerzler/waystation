@@ -1,7 +1,7 @@
 {
   "name": "waystation",
   "version": "1.1.0",
-  "description": "",
+  "description": "Self-hostable Thunderbird FileLink backend: receives uploads, stores files, and serves download links.",
   "main": "src/index.js",
   "scripts": {
     "test": "node --test",
@@ -12,9 +12,13 @@
     "prepare": "husky || true"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Maximilian Schwärzler",
+  "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maximilian-schwaerzler/waystation.git"
+  },
   "dependencies": {
     "better-sqlite3": "^12.11.1",
     "node-cron": "^4.6.0",

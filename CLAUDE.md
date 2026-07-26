@@ -27,8 +27,8 @@ A self-hostable Thunderbird FileLink service. Thunderbird uploads attachments ov
 backend; the backend streams the file to storage and returns a download link; a recipient later fetches the file
 over HTTP. An optional manual web upload UI may be added later for general-purpose use beyond Thunderbird.
 
-**Deployment target:** Hetzner VPS (Docker/Traefik v3), with a Synology NAS (DS223j) as the storage backend,
-connected via Tailscale.
+**Deployment target:** a VPS (Docker/Traefik v3), with a NAS as the storage backend, reachable over a private
+network (e.g. Tailscale/WireGuard).
 
 ## Stack
 
@@ -40,7 +40,7 @@ connected via Tailscale.
 ## Storage abstraction
 
 The app only does filesystem I/O against one path (`/data`). Whether `/data` is local disk or a network mount
-(NFS/SMB over Tailscale to the NAS) is a host-level decision via a configurable bind mount
+(NFS/SMB over a private network to the NAS) is a host-level decision via a configurable bind mount
 (`${WAYSTATION_DATA_DIR:-./data}:/data`) — container code never knows or cares whether it's local or networked
 storage.
 

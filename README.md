@@ -5,18 +5,12 @@ A self-hostable Thunderbird FileLink service.
 ## Getting the code
 
 ```
-git clone git@github.com:maximilian-schwaerzler/waystation.git
+git clone https://github.com/maximilian-schwaerzler/waystation.git
 cd waystation
 ```
 
-To push changes:
-
-```
-git push origin main
-```
-
-The repo is private — push access requires being added as a collaborator on
-[maximilian-schwaerzler/waystation](https://github.com/maximilian-schwaerzler/waystation).
+See [maximilian-schwaerzler/waystation](https://github.com/maximilian-schwaerzler/waystation) for issues and
+contributions.
 
 ## Local development
 
@@ -119,7 +113,7 @@ flow again if you point `WAYSTATION_DATA_DIR` at a fresh, empty volume.
 
 ### Deploying against an NFS-mounted NAS
 
-For off-VPS storage (e.g. a Synology NAS reachable over Tailscale), use the
+For off-VPS storage (e.g. a NAS reachable over your private network), use the
 `docker-compose.nfs.yml` override, which has Docker mount the export directly as a named
 volume:
 
@@ -188,3 +182,9 @@ read the file directly from the host path you configured for `WAYSTATION_DATA_DI
 
 [`openapi.yaml`](openapi.yaml) documents the HTTP API (OpenAPI 3.1) — paste it into
 [Swagger Editor](https://editor.swagger.io) or any OpenAPI viewer to browse it interactively.
+
+## A note on AI assistance
+
+This project was developed with the help of AI tools, visible in the commit history — but it was not
+"vibe coded." AI was used as a tool, not a substitute for understanding: every change was reviewed and
+understood by the author before being committed.
