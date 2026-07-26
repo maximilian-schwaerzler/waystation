@@ -11,3 +11,9 @@ waystation-data
 !.env.example
 coverage
 *.md
+test
+.husky
+jsconfig.json
+eslint.config.js
+nodemon.json
+docker-compose*.yml
