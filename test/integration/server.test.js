@@ -8,7 +8,7 @@ describe("server (no upload token configured)", () => {
     let server;
 
     before(async () => {
-        server = await startServer();
+        server = await startServer({env: {WAYSTATION_MAX_UPLOAD_SIZE_MB: "1"}});
     });
 
     after(async () => {
@@ -99,6 +99,16 @@ describe("server (no upload token configured)", () => {
         assert.equal(downloadRes.headers.get("content-length"), String(content.length));
         assert.match(downloadRes.headers.get("content-disposition"), /filename="fox\.txt"/);
         assert.equal(downloadRes.headers.get("accept-ranges"), "bytes");
+        assert.equal(downloadRes.headers.get("content-type"), "application/octet-stream");
+        assert.equal(downloadRes.headers.get("x-content-type-options"), "nosniff");
+    });
+
+    test("upload larger than the configured max size returns 413", async () => {
+        const res = await fetch(`${server.baseUrl}/upload?filename=too-big.bin`, {
+            method: "POST",
+            body: "x".repeat(2 * 1024 * 1024), // 2MB, exceeds the 1MB test cap
+        });
+        assert.equal(res.status, 413);
     });
 
     test("expired file returns 410", async () => {

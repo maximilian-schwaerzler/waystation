@@ -161,10 +161,17 @@ Set `WAYSTATION_UPLOAD_TOKEN` to require an `Authorization: Bearer <token>` head
 `POST /upload`. `GET /download/:token` is unaffected either way; those links are meant to
 be shared and rely on the token being unguessable, not on this.
 
+`WAYSTATION_MAX_UPLOAD_SIZE_MB` caps how large a single upload can be (default 10 GiB) —
+oversized uploads are rejected with `413` before consuming unbounded disk space.
+
 > [!IMPORTANT]
 > If `WAYSTATION_UPLOAD_TOKEN` is unset, uploads are unauthenticated — anyone who can reach
 > the server can upload files. The server logs a warning at startup as a reminder. Always
 > set this for anything but local dev.
+>
+> If `WAYSTATION_PUBLIC_URL` is unset, download links are built from the request's `Host`
+> header — a header a client controls. The server logs a startup warning as a reminder;
+> always set this in production.
 
 ### Logs
 

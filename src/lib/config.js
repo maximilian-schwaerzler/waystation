@@ -4,6 +4,9 @@ export const INSTANCE_ID_FILENAME = ".waystation_instance_id";
 
 export const uploadExpiryDays = Number(process.env.WAYSTATION_UPLOAD_EXPIRY_DAYS) || 7;
 
+// Caps a single upload's size, bounding worst-case disk usage from one request.
+export const maxUploadSizeBytes = (Number(process.env.WAYSTATION_MAX_UPLOAD_SIZE_MB) || 10240) * 1024 * 1024;
+
 export const port = process.env.WAYSTATION_PORT || 3000;
 
 // Bearer token required on POST /upload requests. If unset, uploads are

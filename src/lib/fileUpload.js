@@ -3,7 +3,7 @@ import {unlink} from "fs/promises";
 import {createHash} from "crypto";
 import path from "path";
 import {v4 as uuidv4} from "uuid";
-import {dataDir, uploadExpiryDays, resolvePublicOrigin} from "./config.js";
+import {dataDir, uploadExpiryDays, maxUploadSizeBytes, resolvePublicOrigin} from "./config.js";
 import {getDb} from "./db.js";
 import {getLogger} from "./logger.js";
 
@@ -31,6 +31,12 @@ export function handleFileUpload(req, res) {
         return res.end('Invalid filename');
     }
 
+    const contentLength = Number(req.headers['content-length']);
+    if (Number.isFinite(contentLength) && contentLength > maxUploadSizeBytes) {
+        res.writeHead(413, {'Content-Type': 'text/plain'});
+        return res.end('File exceeds maximum upload size');
+    }
+
     const uploadsDir = path.join(dataDir, UPLOADS_DIRNAME);
     mkdirSync(uploadsDir, {recursive: true});
 
@@ -41,7 +47,28 @@ export function handleFileUpload(req, res) {
     const writeStream = createWriteStream(path.join(dataDir, storagePath));
 
     const hash = createHash('sha256');
-    req.on('data', (chunk) => hash.update(chunk));
+    let bytesReceived = 0;
+    let aborted = false;
+
+    req.on('data', (chunk) => {
+        if (aborted) return;
+
+        bytesReceived += chunk.length;
+        if (bytesReceived > maxUploadSizeBytes) {
+            aborted = true;
+            getLogger().warn(`Upload aborted: exceeds max upload size (${maxUploadSizeBytes} bytes)`);
+            req.unpipe(writeStream);
+            req.destroy();
+            writeStream.destroy();
+            if (!res.headersSent) {
+                res.writeHead(413, {'Content-Type': 'text/plain'});
+                res.end('File exceeds maximum upload size');
+            }
+            return;
+        }
+
+        hash.update(chunk);
+    });
 
     req.on('error', (err) => {
         getLogger().error(`Upload request error: ${err.message}`);
@@ -53,6 +80,14 @@ export function handleFileUpload(req, res) {
         if (!res.headersSent) {
             res.writeHead(500, {'Content-Type': 'text/plain'});
             res.end('Upload failed');
+        }
+    });
+
+    // Only fires for the size-cap abort path above — writeStream.destroy() skips 'finish',
+    // so this can't double-handle a normal successful upload.
+    writeStream.on('close', () => {
+        if (aborted) {
+            unlink(path.join(dataDir, storagePath)).catch(() => {});
         }
     });
 

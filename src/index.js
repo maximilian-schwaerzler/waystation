@@ -7,7 +7,7 @@ import {ensureDataDirReady} from "./lib/dataStorage.js";
 import {getDb} from "./lib/db.js";
 import {startGc} from "./lib/gc.js";
 import {getLogger} from "./lib/logger.js";
-import {port, uploadAuthToken} from "./lib/config.js";
+import {port, uploadAuthToken, publicUrl} from "./lib/config.js";
 
 const configuredWaystationVars = Object.keys(process.env).filter((key) => key.startsWith("WAYSTATION_"));
 if (configuredWaystationVars.length === 0) {
@@ -26,6 +26,14 @@ if (!uploadAuthToken) {
   getLogger().warn(
     "WAYSTATION_UPLOAD_TOKEN is not set — /upload is unauthenticated. " +
     "Anyone who can reach this server can upload files. Set WAYSTATION_UPLOAD_TOKEN to require a bearer token."
+  );
+}
+
+if (!publicUrl) {
+  getLogger().warn(
+    "WAYSTATION_PUBLIC_URL is not set — download links are built from each request's Host " +
+    "header, which a client can control. Set WAYSTATION_PUBLIC_URL in production so links " +
+    "returned to users don't depend on a client-supplied header."
   );
 }
 

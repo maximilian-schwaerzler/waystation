@@ -13,6 +13,14 @@ refers only to Thunderbird's own client-side attachment-upload feature (which th
 project. Use `waystation` / `WAYSTATION_*` for repo, package, Docker image, and env var prefixes (e.g.
 `WAYSTATION_INSTANCE_ID`, `WAYSTATION_DATA_DIR`) — not `filelink` / `FILELINK_*`.
 
+## Adding a new environment variable
+
+Read from `process.env` in `src/lib/config.js` only — every new `WAYSTATION_*` var needs updates in three
+other places too, or it silently won't reach a Docker Compose deployment or won't be discoverable: the
+`environment:` passthrough list in `docker-compose.yml` (Compose doesn't forward host env vars to the
+container automatically — each one must be listed there), `.env.example` (documented with a comment), and
+`README.md`'s Configuration section if it's security- or setup-relevant.
+
 ## Goal
 
 A self-hostable Thunderbird FileLink service. Thunderbird uploads attachments over HTTP to a Docker-hosted
@@ -93,6 +101,16 @@ warning at startup — this is opt-in rather than enforced so local dev doesn't 
 deployments should always set one. `GET /download/:token` is intentionally unauthenticated regardless — those
 links are meant to be shared by email; the unguessable token is the access control for that endpoint, not a
 bearer token.
+
+`WAYSTATION_MAX_UPLOAD_SIZE_MB` (default 10240, i.e. 10 GiB) caps upload size in `src/lib/fileUpload.js` —
+enforced via `Content-Length` where present and a running byte count during streaming otherwise, since a
+client can omit or lie about `Content-Length`. Oversized uploads are rejected with 413 and the partial file
+is deleted.
+
+`resolvePublicOrigin()` (`src/lib/config.js`) falls back to the request's `Host` header when
+`WAYSTATION_PUBLIC_URL` is unset, to build the `downloadUrl` returned from `/upload`. Since that URL is what
+gets shared with a third party, and `Host` is client-controlled, the server logs a startup warning when
+`WAYSTATION_PUBLIC_URL` is unset — production deployments should always set it.
 
 ## Open / undecided
 

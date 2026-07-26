@@ -85,6 +85,8 @@ export function handleFileDownload(req, res, token) {
             'Accept-Ranges': 'bytes',
             'Content-Length': end - start + 1,
             'Content-Disposition': disposition,
+            'Content-Type': 'application/octet-stream',
+            'X-Content-Type-Options': 'nosniff',
         });
 
         createReadStream(filePath, {start, end}).pipe(res);
@@ -95,6 +97,8 @@ export function handleFileDownload(req, res, token) {
         'Content-Length': stat.size,
         'Accept-Ranges': 'bytes',
         'Content-Disposition': disposition,
+        'Content-Type': 'application/octet-stream',
+        'X-Content-Type-Options': 'nosniff',
     });
 
     createReadStream(filePath).pipe(res);
