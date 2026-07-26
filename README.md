@@ -183,6 +183,14 @@ read the file directly from the host path you configured for `WAYSTATION_DATA_DI
 [`openapi.yaml`](openapi.yaml) documents the HTTP API (OpenAPI 3.1) — paste it into
 [Swagger Editor](https://editor.swagger.io) or any OpenAPI viewer to browse it interactively.
 
+The Thunderbird FileLink integration itself lives in a separate add-on repo:
+[tb-waystation-addon](https://github.com/maximilian-schwaerzler/tb-waystation-addon).
+
+The API is otherwise general-purpose — the OpenAPI spec is enough to build your own client
+against it (any language with an OpenAPI/Swagger codegen tool can generate one), so feel
+free to write your own instead of using the Thunderbird add-on or this README's `curl`
+examples.
+
 ## A note on AI assistance
 
 This project was developed with the help of AI tools, visible in the commit history — but it was not
