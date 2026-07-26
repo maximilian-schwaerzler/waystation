@@ -1,0 +1,265 @@
+openapi: 3.1.0
+info:
+  title: Waystation
+  description: >
+    Self-hostable Thunderbird FileLink backend. Thunderbird uploads an attachment over
+    HTTP, the server streams it to storage and returns a download link, and a recipient
+    later fetches the file over HTTP.
+  version: "1.0.0"
+  license:
+    name: ISC
+
+servers:
+  - url: /
+    description: >
+      Base URL is whatever WAYSTATION_PUBLIC_URL is set to in production (or the request's
+      Host header if unset — see the security note on GET /).
+
+paths:
+  /:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      security: []
+      responses:
+        "200":
+          description: Server is up.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: healthy
+
+  /upload:
+    post:
+      summary: Upload a file
+      description: >
+        Streams the request body to storage and returns a token and download URL. The
+        original filename is taken from the `filename` query parameter (its directory
+        components are stripped; only the basename is kept). The upload is rejected with
+        413 if it exceeds WAYSTATION_MAX_UPLOAD_SIZE_MB, checked against Content-Length
+        up front and against actual bytes received while streaming (so a request that
+        omits or understates Content-Length can't bypass the cap).
+      operationId: uploadFile
+      security:
+        - bearerAuth: []
+        - {}
+      parameters:
+        - name: filename
+          in: query
+          required: true
+          description: Original filename to preserve in the download's Content-Disposition header.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "201":
+          description: Upload succeeded.
+          headers:
+            Location:
+              description: Same value as downloadUrl in the response body.
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResult"
+        "400":
+          description: Missing `filename` query parameter, or it resolves to an empty/`.`/`..` basename.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "401":
+          description: >
+            Missing or incorrect `Authorization: Bearer` header. Only returned when
+            WAYSTATION_UPLOAD_TOKEN is configured — if unset, uploads are unauthenticated.
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: string
+                example: Bearer
+          content:
+            text/plain:
+              schema:
+                type: string
+        "413":
+          description: Upload exceeds WAYSTATION_MAX_UPLOAD_SIZE_MB.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Writing the file to storage, or persisting its database record, failed.
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /download/{token}:
+    get:
+      summary: Download a file
+      description: >
+        Intentionally unauthenticated regardless of whether WAYSTATION_UPLOAD_TOKEN is
+        set — these links are meant to be shared by email, and the unguessable token
+        itself is the access control. Supports HTTP Range requests for resuming/partial
+        downloads.
+      operationId: downloadFile
+      security: []
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Range
+          in: header
+          required: false
+          description: 'Byte range, e.g. `bytes=0-999` or `bytes=-500` for the last 500 bytes.'
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Full file content.
+          headers:
+            Content-Length:
+              schema:
+                type: integer
+            Content-Disposition:
+              schema:
+                type: string
+            Accept-Ranges:
+              schema:
+                type: string
+                example: bytes
+            X-Content-Type-Options:
+              schema:
+                type: string
+                example: nosniff
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "206":
+          description: Partial content for a satisfiable Range request.
+          headers:
+            Content-Range:
+              schema:
+                type: string
+                example: bytes 0-999/5000
+            Content-Length:
+              schema:
+                type: integer
+            Content-Disposition:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+                example: nosniff
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Unknown token, or the file's database row exists but the blob is missing on disk.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "410":
+          description: The file existed but has expired (past WAYSTATION_UPLOAD_EXPIRY_DAYS).
+          content:
+            text/plain:
+              schema:
+                type: string
+        "416":
+          description: Range header is malformed or unsatisfiable for this file's size.
+          headers:
+            Content-Range:
+              schema:
+                type: string
+                example: bytes */5000
+
+  /upload/{token}:
+    delete:
+      summary: Delete an uploaded file
+      description: >
+        Deletes the file's blob and database record. Intended for Thunderbird's
+        cloudFile onFileDeleted event (fired when the user removes the attachment
+        before sending, or deletes it later from the FileLink management UI). Uses the
+        same bearer-token auth as POST /upload.
+      operationId: deleteFile
+      security:
+        - bearerAuth: []
+        - {}
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Deleted (or was already gone from disk — the database row is removed either way).
+        "401":
+          description: "Missing or incorrect `Authorization: Bearer` header, when WAYSTATION_UPLOAD_TOKEN is configured."
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: string
+                example: Bearer
+          content:
+            text/plain:
+              schema:
+                type: string
+        "404":
+          description: Unknown token (including one already deleted).
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Deleting the file from disk failed for a reason other than it already being gone.
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: >
+        Required only when WAYSTATION_UPLOAD_TOKEN is set on the server. If unset,
+        POST /upload and DELETE /upload/{token} are unauthenticated.
+
+  schemas:
+    UploadResult:
+      type: object
+      required: [token, downloadUrl, expiresAt]
+      properties:
+        token:
+          type: string
+          format: uuid
+          description: Download token; also used as the {token} path parameter for DELETE /upload/{token}.
+        downloadUrl:
+          type: string
+          format: uri
+          description: Full URL for GET /download/{token}.
+        expiresAt:
+          type: string
+          format: date-time
+          description: When the file becomes inaccessible (410) and eligible for garbage collection.

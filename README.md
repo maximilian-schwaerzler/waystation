@@ -183,3 +183,8 @@ Logs are also written to `waystation.log` inside the storage volume (`WAYSTATION
 on the host), rotated at 10MB via `pino-roll`. Useful if the container isn't running (crash
 loop, already exited) or you need history beyond what `docker compose logs` retains — just
 read the file directly from the host path you configured for `WAYSTATION_DATA_DIR`.
+
+## API
+
+[`openapi.yaml`](openapi.yaml) documents the HTTP API (OpenAPI 3.1) — paste it into
+[Swagger Editor](https://editor.swagger.io) or any OpenAPI viewer to browse it interactively.
