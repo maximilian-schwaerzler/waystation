@@ -22,9 +22,6 @@
     "pino-roll": "^4.0.0",
     "uuid": "^14.0.1"
   },
-  "allowScripts": {
-    "better-sqlite3@12.11.1": true
-  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/better-sqlite3": "^7.6.13",
