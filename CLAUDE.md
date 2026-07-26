@@ -130,6 +130,8 @@ bearer token.
 - [x] Content-Disposition header with original filename
 - [x] Content-Length header
 - [x] HTTP Range request support
+- [x] File deletion endpoint (`DELETE /upload/:token`, same bearer auth as upload) for Thunderbird's
+      `onFileDeleted`
 
 **Thunderbird FileLink protocol**
 - [ ] Decide provider type (WebDAV-style vs. custom REST)

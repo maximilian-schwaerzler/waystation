@@ -1,8 +1,6 @@
 import cron from "node-cron";
-import {unlink} from "fs/promises";
-import path from "path";
-import {dataDir} from "./config.js";
 import {getDb} from "./db.js";
+import {deleteFile} from "./fileRemoval.js";
 import {getLogger} from "./logger.js";
 
 // Cron expression for how often GC sweeps expired files. Defaults to hourly.
@@ -28,16 +26,11 @@ export async function runGc() {
     let deletedCount = 0;
     for (const file of expired) {
         try {
-            await unlink(path.join(dataDir, file.storage_path));
+            await deleteFile(file.id, file.storage_path);
         } catch (err) {
-            if (err.code !== 'ENOENT') {
-                getLogger().error(`GC: failed to delete file for file id ${file.id}: ${err.code}`);
-                continue;
-            }
-            // ENOENT: file's already gone, fine to remove the row below
+            getLogger().error(`GC: failed to delete file for file id ${file.id}: ${err.code}`);
+            continue;
         }
-
-        getDb().prepare(`DELETE FROM files WHERE id = ?`).run(file.id);
         deletedCount++;
     }
 
